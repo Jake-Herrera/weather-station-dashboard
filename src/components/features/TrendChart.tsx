@@ -21,14 +21,14 @@ export function TrendChart({ readings }: Props) {
 
   if (data.length === 0) {
     return (
-      <div className="rounded-xl border border-gray-700 bg-gray-900 p-5">
+      <div className="rounded-xl border border-gray-700 bg-transparent p-5">
         <p className="text-gray-500">No data to chart yet</p>
       </div>
     );
   }
 
   return (
-    <div className="rounded-xl border border-gray-700 bg-gray-900 p-5">
+    <div className="rounded-xl border border-gray-700 bg-transparent p-5">
       <p className="mb-4 text-xs tracking-widest text-gray-400">
         TENDENCIA · SERIES ATMOSFÉRICAS
       </p>
