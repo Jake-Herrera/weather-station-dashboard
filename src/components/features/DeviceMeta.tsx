@@ -1,4 +1,5 @@
 import { useDeviceMeta } from "@/hooks/useDeviceMeta";
+import { CloudSun } from 'lucide-react';
 
 type Props = {
   deviceId: string;
@@ -15,7 +16,7 @@ export function DeviceMeta({ deviceId }: Props) {
     <div className="flex items-center gap-3.5">
       {/* Logo placeholder */}
       <div className="grid h-9 w-9 place-items-center rounded-[10px] border border-white/10 bg-white/[0.07]">
-        {/* icon goes here later */}
+        <CloudSun className="h-5 w-5 text-white/80" />
       </div>
 
       <div className="flex flex-col">
