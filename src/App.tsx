@@ -21,7 +21,7 @@ function App() {
   const altitudeStats = computeStats(visibleReadings, 'altitude_m');
 
   return (
-    <div className="min-h-screen bg-gray-950 p-6">
+    <div className="min-h-screen bg-atmosphere px-8 py-7">
       <RangeFilter selectedRange={range} onChange={setRange} />
 
       {loading && <p className="mt-4 text-gray-400">Loading…</p>}
