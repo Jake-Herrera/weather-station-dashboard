@@ -33,11 +33,11 @@
 
 ### Key objectives (what success looks like)
 
-- [ ] Show the three live metrics (temperature, pressure, altitude)
-- [ ] Compute and show stats per metric (max, min, average, range delta) for the selected range
+- [x] Show the three live metrics (temperature, pressure, altitude)
+- [x] Compute and show stats per metric (max, min, average, range delta) for the selected range
 - [ ] Plot a time-series trend chart with a dual axis (temp + pressure)
-- [ ] Switch the time range (1h / 6h / 24h / 7d / 30d)
-- [ ] Update in real time as new readings arrive (Firebase)
+- [x] Switch the time range (1h / 6h / 24h / 7d / 30d)
+- [x] Update in real time as new readings arrive (Firebase)
 - [ ] Deploy publicly on Vercel
 
 ---
@@ -103,16 +103,19 @@
         └─────────────────┘        └───────────────────┘
 ```
 
-### Data-fetching strategy ("hybrid read")
+### Data-fetching strategy ("read all from Firebase, filter client-side")
 
-- **Historical series + stats** → fetched from the backend `GET /readings?range=...`
-  (the backend already filters by time range on the server side).
-- **Live updates** → subscribed directly from Firebase (client SDK), so new readings appear
-  without polling.
-- **Device metadata** (name, location) → read once from Firebase `devices/<id>`.
+- **All readings** → subscribed directly from Firebase (client SDK) via `useReadings`, so new
+  readings appear in real time without polling.
+- **Range filtering** → done in the frontend (`filterReadingsByRange`), not via the backend.
+  The full readings list is filtered by the selected range in the client.
+- **Stats (max/min/avg/Δ)** → computed in the frontend (`computeStats`) from the filtered list.
+- **Device metadata** (name, location) → read once from Firebase `devices/<id>` (`useDeviceMeta`).
 
-> This mirrors the system-wide "centralized write, hybrid read" decision: the dashboard never
-> writes anything; it only reads.
+> **Decision (Camino A):** for the current data volume, reading everything from Firebase and
+> filtering/computing in the client is simplest and gives real-time updates for free. The
+> backend `GET /readings` endpoint still exists and is available, but the dashboard does not
+> use it for now. Revisit (hybrid: backend for history + Firebase for live) if data grows large.
 
 ### Patterns in use
 
@@ -191,13 +194,16 @@ type DeviceMeta = {
 
 | Feature                          | Status         | Notes                                   |
 |----------------------------------|----------------|-----------------------------------------|
-| Fetch readings from the backend  | ⬜ Pending     | `GET /readings?range=`                  |
-| Three metric cards (temp/press/alt) | ⬜ Pending  | with live current value                 |
-| Stats per metric (max/min/avg/Δ) | ⬜ Pending     | computed in the frontend                |
-| Trend chart (dual axis)          | ⬜ Pending     | Recharts                                |
-| Time-range filter (1h…30d)       | ⬜ Pending     | five buttons                            |
-| Real-time updates (Firebase)     | ⬜ Pending     | client SDK subscription                 |
-| Device header (name + location)  | ⬜ Pending     | from Firebase `devices/<id>`            |
+| Read readings from Firebase      | ✅ Done        | `useReadings` (real-time subscription)  |
+| Range filtering (client-side)    | ✅ Done        | `filterReadingsByRange` (pure, tested)  |
+| Stats per metric (max/min/avg/Δ) | ✅ Done        | `computeStats` (pure, tested)           |
+| Three metric cards (temp/press/alt) | ✅ Done     | `MetricCard` with current value + stats |
+| Time-range filter (1h…30d)       | ✅ Done        | `RangeFilter` (five buttons)            |
+| Real-time updates (Firebase)     | ✅ Done        | via `useReadings` `onValue` subscription|
+| Trend chart (dual axis)          | ⬜ Pending     | Recharts (next piece)                   |
+| Device header (name + location)  | 🚧 Hook ready  | `useDeviceMeta` built, not wired to UI  |
+| "Real time" indicator            | ⬜ Pending     | visual badge                            |
+| Visual polish (glassmorphism)    | ⬜ Pending     | match the design mockup                 |
 | Deploy to Vercel                 | ⬜ Pending     |                                         |
 
 ### ❌ Out of Scope (for now)
@@ -368,38 +374,51 @@ fix/xxx       → bugfixes
 | 2026-05-22  | Real-time via Firebase client SDK         | True push updates instead of polling the backend                 |
 | 2026-05-22  | No Zustand / React Query yet              | App is small; local state + hooks suffice. Revisit if it grows   |
 | 2026-05-22  | Device metadata in Firebase `devices/`    | Read by the dashboard; injected manually for now (endpoint later)|
+| 2026-05-23  | Read all from Firebase, filter client-side| Simplest for current volume; real-time for free. Backend `/readings` unused for now |
 
 ---
 
 ## 14. Current Project Status
 
-**Last updated:** `2026-05-22`
+**Last updated:** `2026-05-23`
 
 ### What already exists and works
 
-- [x] Backend `GET /readings` available and deployed (provides the historical data)
-- [x] Firebase holds live readings under `readings/<deviceId>`
-- [x] Design reference available (Claude Design mockup: dark, glassmorphism)
+- [x] Vite + React + TS project scaffolded; Tailwind 4 wired (`@tailwindcss/vite` + `@import`)
+- [x] `@/` path alias configured in Vite, tsconfig, and Vitest
+- [x] Firebase client connected (`lib/firebase.ts`), reading live data
+- [x] `useReadings` — real-time subscription to `readings/<deviceId>`
+- [x] `useDeviceMeta` — reads `devices/<deviceId>` (hook ready, not yet shown in UI)
+- [x] `filterReadingsByRange` — client-side range filtering (pure, unit-tested)
+- [x] `computeStats` — max/min/avg/rangeDelta per metric (pure, unit-tested)
+- [x] `RangeFilter` — five range buttons, controlled component
+- [x] `MetricCard` — shows current value + stats; three cards (temp/pressure/altitude)
+- [x] Unit tests passing (Vitest) for stats; tests included in `tsconfig.app.json`
+- [x] Types unified in `types/reading.ts` (Reading, TimeRange, DeviceMeta)
+- [x] Firebase production rules active + `devices` node created (see data-layer)
 
 ### In progress right now
 
-- [ ] Scaffold the Vite + React + TS project
+- [ ] Trend chart with Recharts (dual axis: temp + pressure)
 
 ### Pending
 
-- [ ] Everything in section 6 (this layer is just starting)
-- [ ] Create `devices/esp32-01` metadata node in Firebase (manual)
-- [ ] Harden Firebase rules for client reads (incl. `devices`) + update `data-layer.md`
+- [ ] Wire `useDeviceMeta` into a header (device name + location)
+- [ ] "Real time" indicator badge
+- [ ] Visual polish to match the design (glassmorphism, gradients, layout)
+- [ ] Deploy to Vercel
 
 ### Known technical debt
 
 - [ ] Device metadata is injected manually; no registration endpoint yet
-- [ ] Backend assigns/handles timestamps as placeholder (`millis()` from device) — affects
-      real-time filtering until resolved at the firmware level
+- [ ] Backend assigns/handles timestamps as placeholder (`millis()` from device) — ESP32
+      readings won't fall in real-time range filters correctly until resolved at the firmware level
+- [ ] `api.ts` (backend client) exists but is unused (Camino A); keep or remove later
 
 ### Known limitations
 
 - [ ] Single device only (no multi-device support yet)
+- [ ] Physical BMP280 sensor pending replacement (factory-defective) — data is simulated
 
 ---
 
