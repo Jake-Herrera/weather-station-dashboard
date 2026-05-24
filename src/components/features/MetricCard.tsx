@@ -10,7 +10,7 @@ type Props = {
 export function MetricCard({ label, unit, stats, decimals = 1 }: Props) {
   if (!stats) {
     return (
-      <div className="rounded-xl border border-gray-700 bg-gray-900 p-5">
+      <div className="rounded-xl border border-gray-700 bg-transparent p-5">
         <p className="text-xs tracking-widest text-gray-400">{label}</p>
         <p className="mt-4 text-gray-500">No data</p>
       </div>
@@ -20,7 +20,7 @@ export function MetricCard({ label, unit, stats, decimals = 1 }: Props) {
   const fmt = (n: number) => n.toFixed(decimals);
 
   return (
-    <div className="rounded-xl border border-gray-700 bg-gray-900 p-5">
+    <div className="rounded-xl border border-gray-700 bg-transparent p-5">
       <p className="text-xs tracking-widest text-gray-400">{label}</p>
 
       {/* Current value, big */}
@@ -30,7 +30,7 @@ export function MetricCard({ label, unit, stats, decimals = 1 }: Props) {
       </p>
 
       {/* Stats row */}
-      <div className="mt-4 flex gap-6 text-xs">
+      <div className="mt-4 flex flex-wrap gap-6 text-xs">
         <div>
           <p className="text-gray-500">MÁX</p>
           <p className="text-gray-200">{fmt(stats.max)}{unit}</p>
