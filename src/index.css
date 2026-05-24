@@ -48,3 +48,13 @@
       rgba(0, 0, 0, 0.4) 0 10px 15px -3px, rgba(0, 0, 0, 0.25) 0 4px 6px -2px;
   }
 }
+
+@layer utilities {
+  .bg-atmosphere {
+    background:
+      radial-gradient(80% 60% at 20% 0%, rgb(26, 58, 110) 0%, transparent 60%),
+      radial-gradient(70% 80% at 100% 100%, rgb(74, 29, 107) 0%, transparent 55%),
+      radial-gradient(100% 50% at 50% 100%, rgb(10, 24, 48) 0%, transparent 70%),
+      linear-gradient(rgb(5, 8, 20) 0%, rgb(10, 15, 31) 100%);
+  }
+}
