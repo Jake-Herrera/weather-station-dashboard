@@ -8,6 +8,7 @@ import { computeStats } from '@/services/compute-stats';
 import type { TimeRange } from '@/types/reading';
 import { TrendChart } from '@/components/features/TrendChart';
 import { RealTimer } from '@/components/features/RealTimer';
+import DeviceMeta from './components/features/DeviceMeta';
 
 const DEVICE_ID = import.meta.env.VITE_DEVICE_ID ?? 'esp32-01';
 
@@ -23,6 +24,7 @@ function App() {
 
   return (
     <div className="min-h-screen bg-atmosphere px-8 py-7">
+      <DeviceMeta deviceId={DEVICE_ID} />
       <RangeFilter selectedRange={range} onChange={setRange} />
 
       {loading && <p className="mt-4 text-gray-400">Loading…</p>}
