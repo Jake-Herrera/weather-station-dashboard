@@ -24,13 +24,16 @@ function App() {
 
   return (
     <div className="min-h-screen bg-atmosphere px-8 py-7">
-      <DeviceMeta deviceId={DEVICE_ID} />
+      <div className='flex flex-col-reverse gap-[10px] md:justify-between md:flex-row'>
+        <DeviceMeta deviceId={DEVICE_ID} />
+        <RealTimer/>
+      </div>
+      
       <RangeFilter selectedRange={range} onChange={setRange} />
 
       {loading && <p className="mt-4 text-gray-400">Loading…</p>}
       {error && <p className="mt-4 text-red-400">Error: {error}</p>}
 
-      <RealTimer/>
       <div className="mt-6 grid grid-cols-1 gap-4 md:grid-cols-3">
         <MetricCard label="TEMPERATURA" unit="°C" stats={tempStats} />
         <MetricCard label="PRESIÓN" unit="hPa" stats={pressureStats} decimals={1} />

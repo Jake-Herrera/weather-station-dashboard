@@ -16,7 +16,7 @@ export function RangeFilter({
   onChange,
 }: Props) {
     return (
-        <div className="relative z-1 flex w-fit self-start gap-1 rounded-xl border border-white/10 bg-white/5 p-1 backdrop-blur-xl">
+        <div className="mt-6 relative z-1 flex w-fit self-start gap-1 rounded-xl border border-white/10 bg-white/5 p-1 backdrop-blur-xl">
         {RANGES.map((range) => (
             <button
             key={range}
