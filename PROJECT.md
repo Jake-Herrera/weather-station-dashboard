@@ -16,8 +16,8 @@
 | **Status**          | 🟡 In development |
 | **Type**            | Web App (SPA) |
 | **Audience**        | Anyone viewing the weather station data (and portfolio visitors) |
-| **Owner**           | `Jake` — `<email>` |
-| **Repository**      | `https://github.com/<user>/weather-station-dashboard` |
+| **Owner**           | `Jake` — `jkherrera96@outlook.com` |
+| **Repository**      | `https://github.com/Jake-Herrera/weather-station-dashboard` |
 
 ### Problem it solves
 
@@ -56,6 +56,7 @@
 | Vite           | `6.x`     | Bundler / dev server             |
 | Tailwind CSS   | `4.x`     | Styling (utility-first)          |
 | Recharts       | `2.x`     | Charts (time-series, dual axis)  |
+| lucide-react   | `0.x`     | Icons (header, UI)               |
 | Firebase (web) | `11.x`    | Real-time reads (client SDK)     |
 
 ### Tooling
@@ -198,12 +199,12 @@ type DeviceMeta = {
 | Range filtering (client-side)    | ✅ Done        | `filterReadingsByRange` (pure, tested)  |
 | Stats per metric (max/min/avg/Δ) | ✅ Done        | `computeStats` (pure, tested)           |
 | Three metric cards (temp/press/alt) | ✅ Done     | `MetricCard` with current value + stats |
-| Time-range filter (1h…30d)       | ✅ Done        | `RangeFilter` (five buttons)            |
+| Time-range filter (1h…30d)       | ✅ Done        | `RangeFilter` (glassmorphism style)     |
 | Real-time updates (Firebase)     | ✅ Done        | via `useReadings` `onValue` subscription|
-| Trend chart (dual axis)          | ⬜ Pending     | Recharts (next piece)                   |
-| Device header (name + location)  | 🚧 Hook ready  | `useDeviceMeta` built, not wired to UI  |
-| "Real time" indicator            | ⬜ Pending     | visual badge                            |
-| Visual polish (glassmorphism)    | ⬜ Pending     | match the design mockup                 |
+| Trend chart (dual axis + altitude)| ✅ Done       | Recharts `ComposedChart` (temp area + 2 lines) |
+| Device header (name + location)  | ✅ Done        | `DeviceMeta` wired to `useDeviceMeta` + lucide icon |
+| Live clock + "Real time" badge   | ✅ Done        | `RealTimer` (updates every second)      |
+| Atmospheric background + styling | ✅ Done        | gradients + glassmorphism (matching design) |
 | Deploy to Vercel                 | ⬜ Pending     |                                         |
 
 ### ❌ Out of Scope (for now)
@@ -375,12 +376,14 @@ fix/xxx       → bugfixes
 | 2026-05-22  | No Zustand / React Query yet              | App is small; local state + hooks suffice. Revisit if it grows   |
 | 2026-05-22  | Device metadata in Firebase `devices/`    | Read by the dashboard; injected manually for now (endpoint later)|
 | 2026-05-23  | Read all from Firebase, filter client-side| Simplest for current volume; real-time for free. Backend `/readings` unused for now |
+| 2026-05-24  | `ComposedChart` (temp area + lines)       | Temperature as filled area; pressure/altitude as lines on separate axes |
+| 2026-05-24  | lucide-react for icons                    | Standard React icon set; no SVG files to manage; Tailwind-styleable |
 
 ---
 
 ## 14. Current Project Status
 
-**Last updated:** `2026-05-23`
+**Last updated:** `2026-05-24`
 
 ### What already exists and works
 
@@ -388,24 +391,25 @@ fix/xxx       → bugfixes
 - [x] `@/` path alias configured in Vite, tsconfig, and Vitest
 - [x] Firebase client connected (`lib/firebase.ts`), reading live data
 - [x] `useReadings` — real-time subscription to `readings/<deviceId>`
-- [x] `useDeviceMeta` — reads `devices/<deviceId>` (hook ready, not yet shown in UI)
+- [x] `useDeviceMeta` — reads `devices/<deviceId>` (now wired into the header)
 - [x] `filterReadingsByRange` — client-side range filtering (pure, unit-tested)
 - [x] `computeStats` — max/min/avg/rangeDelta per metric (pure, unit-tested)
-- [x] `RangeFilter` — five range buttons, controlled component
+- [x] `RangeFilter` — five range buttons, glassmorphism styling
 - [x] `MetricCard` — shows current value + stats; three cards (temp/pressure/altitude)
+- [x] `TrendChart` — Recharts ComposedChart: temp area + pressure/altitude lines, dual axis
+- [x] `DeviceMeta` — header with device name + location + lucide icon
+- [x] `RealTimer` — live clock (updates every second) + "Tiempo real" indicator badge
+- [x] Atmospheric gradient background (`bg-atmosphere`) + glassmorphism utilities
 - [x] Unit tests passing (Vitest) for stats; tests included in `tsconfig.app.json`
 - [x] Types unified in `types/reading.ts` (Reading, TimeRange, DeviceMeta)
 - [x] Firebase production rules active + `devices` node created (see data-layer)
 
 ### In progress right now
 
-- [ ] Trend chart with Recharts (dual axis: temp + pressure)
+- [ ] Assemble the header: `DeviceMeta` (left) + `RealTimer` (right) with `justify-between`
 
 ### Pending
 
-- [ ] Wire `useDeviceMeta` into a header (device name + location)
-- [ ] "Real time" indicator badge
-- [ ] Visual polish to match the design (glassmorphism, gradients, layout)
 - [ ] Deploy to Vercel
 
 ### Known technical debt
@@ -414,6 +418,8 @@ fix/xxx       → bugfixes
 - [ ] Backend assigns/handles timestamps as placeholder (`millis()` from device) — ESP32
       readings won't fall in real-time range filters correctly until resolved at the firmware level
 - [ ] `api.ts` (backend client) exists but is unused (Camino A); keep or remove later
+- [ ] `TrendChart`: altitude `<YAxis>` needs `width={0}` (not just `hide`) or it reserves
+      space and pushes the plot — documented inline; don't "clean it up"
 
 ### Known limitations
 
