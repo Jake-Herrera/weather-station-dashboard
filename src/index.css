@@ -57,4 +57,11 @@
       radial-gradient(100% 50% at 50% 100%, rgb(10, 24, 48) 0%, transparent 70%),
       linear-gradient(rgb(5, 8, 20) 0%, rgb(10, 15, 31) 100%);
   }
+
+  .glass {
+    border-radius: 0.75rem;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(20px);
+  }
 }
