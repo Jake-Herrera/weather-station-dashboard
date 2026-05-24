@@ -6,6 +6,7 @@ import { useReadings } from '@/hooks/useReadings';
 import { filterReadingsByRange } from '@/services/filter-readings';
 import { computeStats } from '@/services/compute-stats';
 import type { TimeRange } from '@/types/reading';
+import { TrendChart } from '@/components/features/TrendChart';
 
 const DEVICE_ID = import.meta.env.VITE_DEVICE_ID ?? 'esp32-01';
 
@@ -30,6 +31,9 @@ function App() {
         <MetricCard label="TEMPERATURA" unit="°C" stats={tempStats} />
         <MetricCard label="PRESIÓN" unit="hPa" stats={pressureStats} decimals={1} />
         <MetricCard label="ALTITUD" unit="m" stats={altitudeStats} decimals={0} />
+      </div>
+      <div className="mt-4">
+        <TrendChart readings={visibleReadings} />
       </div>
     </div>
   );
