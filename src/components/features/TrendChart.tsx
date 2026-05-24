@@ -33,7 +33,7 @@ export function TrendChart({ readings }: Props) {
         TENDENCIA · SERIES ATMOSFÉRICAS
       </p>
 
-      <ResponsiveContainer width="100%" height={320}>
+      <ResponsiveContainer width="100%" height={420}>
         <ComposedChart data={data}>
           {/* Gradient definition for the temperature area fill */}
           <defs>
@@ -62,7 +62,7 @@ export function TrendChart({ readings }: Props) {
             domain={['auto', 'auto']}
           />
           {/* Hidden axis: altitude */}
-          <YAxis yAxisId="altitude" hide domain={['auto', 'auto']} />
+          <YAxis yAxisId="altitude" width={0} hide domain={['auto', 'auto']} />
 
           <Tooltip
             contentStyle={{
