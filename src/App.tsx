@@ -7,6 +7,7 @@ import { filterReadingsByRange } from '@/services/filter-readings';
 import { computeStats } from '@/services/compute-stats';
 import type { TimeRange } from '@/types/reading';
 import { TrendChart } from '@/components/features/TrendChart';
+import { RealTimer } from '@/components/features/RealTimer';
 
 const DEVICE_ID = import.meta.env.VITE_DEVICE_ID ?? 'esp32-01';
 
@@ -27,6 +28,7 @@ function App() {
       {loading && <p className="mt-4 text-gray-400">Loading…</p>}
       {error && <p className="mt-4 text-red-400">Error: {error}</p>}
 
+      <RealTimer/>
       <div className="mt-6 grid grid-cols-1 gap-4 md:grid-cols-3">
         <MetricCard label="TEMPERATURA" unit="°C" stats={tempStats} />
         <MetricCard label="PRESIÓN" unit="hPa" stats={pressureStats} decimals={1} />
