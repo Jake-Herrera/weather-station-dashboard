@@ -13,7 +13,8 @@
 | **Name**            | `weather-station-dashboard` |
 | **Layer**           | 🖥️ Presentation (client) |
 | **Current version** | `0.1.0` |
-| **Status**          | 🟡 In development |
+| **Status**          | 🟢 Live (MVP en producción) |
+| **Production URL**  | `https://weather-station-dashboard-hazel.vercel.app` |
 | **Type**            | Web App (SPA) |
 | **Audience**        | Anyone viewing the weather station data (and portfolio visitors) |
 | **Owner**           | `Jake` — `jkherrera96@outlook.com` |
@@ -205,7 +206,7 @@ type DeviceMeta = {
 | Device header (name + location)  | ✅ Done        | `DeviceMeta` wired to `useDeviceMeta` + lucide icon |
 | Live clock + "Real time" badge   | ✅ Done        | `RealTimer` (updates every second)      |
 | Atmospheric background + styling | ✅ Done        | gradients + glassmorphism (matching design) |
-| Deploy to Vercel                 | ⬜ Pending     |                                         |
+| Deploy to Vercel                 | ✅ Done        | `weather-station-dashboard-hazel.vercel.app` |
 
 ### ❌ Out of Scope (for now)
 
@@ -383,7 +384,7 @@ fix/xxx       → bugfixes
 
 ## 14. Current Project Status
 
-**Last updated:** `2026-05-24`
+**Last updated:** `2026-05-25`
 
 ### What already exists and works
 
@@ -403,28 +404,26 @@ fix/xxx       → bugfixes
 - [x] Unit tests passing (Vitest) for stats; tests included in `tsconfig.app.json`
 - [x] Types unified in `types/reading.ts` (Reading, TimeRange, DeviceMeta)
 - [x] Firebase production rules active + `devices` node created (see data-layer)
+- [x] Header assembled: `DeviceMeta` (left) + `RealTimer` (right), responsive (`flex-col-reverse` mobile / `justify-between` desktop)
+- [x] Deployed to Vercel (`weather-station-dashboard-hazel.vercel.app`)
 
 ### In progress right now
 
-- [ ] Assemble the header: `DeviceMeta` (left) + `RealTimer` (right) with `justify-between`
+_Nothing actively in progress._
 
 ### Pending
 
-- [ ] Deploy to Vercel
+- [ ] Ability to view each chart series individually (toggle temp/pressure/altitude)
 
 ### Known technical debt
 
-- [ ] Device metadata is injected manually; no registration endpoint yet
-- [ ] Backend assigns/handles timestamps as placeholder (`millis()` from device) — ESP32
-      readings won't fall in real-time range filters correctly until resolved at the firmware level
 - [ ] `api.ts` (backend client) exists but is unused (Camino A); keep or remove later
 - [ ] `TrendChart`: altitude `<YAxis>` needs `width={0}` (not just `hide`) or it reserves
       space and pushes the plot — documented inline; don't "clean it up"
 
 ### Known limitations
 
-- [ ] Single device only (no multi-device support yet)
-- [ ] Physical BMP280 sensor pending replacement (factory-defective) — data is simulated
+- [ ] Single device only (dashboard hardcoded to one deviceId)
 
 ---
 
