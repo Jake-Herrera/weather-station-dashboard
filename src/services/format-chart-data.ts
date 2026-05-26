@@ -11,7 +11,9 @@ export type ChartPoint = {
 // Pure function: turn readings into chart points with a formatted time label.
 export function formatChartData(readings: Reading[]): ChartPoint[] {
   return readings.map((reading) => ({
-    time: new Date(reading.ts).toLocaleTimeString('es-CR', {
+    time: new Date(reading.ts).toLocaleString('es-CR', {
+      day: '2-digit',
+      month: '2-digit',
       hour: '2-digit',
       minute: '2-digit',
     }),
