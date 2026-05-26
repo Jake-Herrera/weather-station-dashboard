@@ -24,7 +24,7 @@ function App() {
 
   return (
     <div className="min-h-screen bg-atmosphere px-8 py-7">
-      <div className='flex flex-col-reverse gap-[10px] md:justify-between md:flex-row'>
+      <div className='flex flex-col-reverse gap-[10px] lg:justify-between lg:flex-row'>
         <DeviceMeta deviceId={DEVICE_ID} />
         <RealTimer/>
       </div>
@@ -34,7 +34,7 @@ function App() {
       {loading && <p className="mt-4 text-gray-400">Loading…</p>}
       {error && <p className="mt-4 text-red-400">Error: {error}</p>}
 
-      <div className="mt-6 grid grid-cols-1 gap-4 md:grid-cols-3">
+      <div className="mt-6 grid grid-cols-1 gap-4 lg:grid-cols-3">
         <MetricCard label="TEMPERATURA" unit="°C" stats={tempStats} />
         <MetricCard label="PRESIÓN" unit="hPa" stats={pressureStats} decimals={1} />
         <MetricCard label="ALTITUD" unit="m" stats={altitudeStats} decimals={0} />
