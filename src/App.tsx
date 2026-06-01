@@ -21,6 +21,7 @@ function App() {
   const tempStats = computeStats(visibleReadings, 'temp_c');
   const pressureStats = computeStats(visibleReadings, 'pressure_hpa');
   const altitudeStats = computeStats(visibleReadings, 'altitude_m');
+  const humidityStats = computeStats(visibleReadings, 'humidity_pct');
 
   return (
     <div className="min-h-screen bg-atmosphere px-8 py-7">
@@ -35,9 +36,10 @@ function App() {
       {error && <p className="mt-4 text-red-400">Error: {error}</p>}
 
       <div className="mt-6 grid grid-cols-1 gap-4 lg:grid-cols-3">
-        <MetricCard label="TEMPERATURA" unit="°C" stats={tempStats} />
-        <MetricCard label="PRESIÓN" unit="hPa" stats={pressureStats} decimals={1} />
-        <MetricCard label="ALTITUD" unit="m" stats={altitudeStats} decimals={0} />
+        <MetricCard metric="temp_c" stats={tempStats} />
+        <MetricCard metric="pressure_hpa" stats={pressureStats} />
+        <MetricCard metric="altitude_m" stats={altitudeStats} />
+        <MetricCard metric="humidity_pct" stats={humidityStats} />
       </div>
       <div className="mt-4">
         <TrendChart readings={visibleReadings} />

@@ -3,6 +3,7 @@ export type Reading = {
   temp_c: number;
   pressure_hpa: number;
   altitude_m: number;
+  humidity_pct: number;
 };
 
 export type TimeRange =

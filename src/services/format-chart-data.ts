@@ -6,6 +6,7 @@ export type ChartPoint = {
   temp_c: number;
   pressure_hpa: number;
   altitude_m: number;
+  humidity_pct : number;
 };
 
 // Pure function: turn readings into chart points with a formatted time label.
@@ -20,5 +21,6 @@ export function formatChartData(readings: Reading[]): ChartPoint[] {
     temp_c: reading.temp_c,
     pressure_hpa: reading.pressure_hpa,
     altitude_m: reading.altitude_m,
+    humidity_pct: reading.humidity_pct
   }));
 }

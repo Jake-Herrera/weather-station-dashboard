@@ -1,13 +1,14 @@
 import type { MetricStats } from '@/services/compute-stats';
+import { METRICS, type MetricKey } from '@/types/metrics';
 
 type Props = {
-  label: string; // "TEMPERATURA"
-  unit: string; // "°C"
+  metric: MetricKey;
   stats: MetricStats | null;
-  decimals?: number; // how many decimals to show
 };
 
-export function MetricCard({ label, unit, stats, decimals = 1 }: Props) {
+export function MetricCard({ metric, stats }: Props) {
+  const { label, unit, decimals } = METRICS[metric];
+
   if (!stats) {
     return (
       <div className="rounded-xl border border-gray-700 bg-transparent p-5">
