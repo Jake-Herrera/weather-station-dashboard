@@ -9,6 +9,7 @@ function makeReadings(temps: number[]): Reading[] {
     temp_c: temp,
     pressure_hpa: 1013,
     altitude_m: 100,
+    humidity_pct: 50,
   }));
 }
 
@@ -46,5 +47,20 @@ describe('computeStats', () => {
     expect(stats!.min).toBe(21.5);
     expect(stats!.avg).toBe(21.5);
     expect(stats!.rangeDelta).toBe(0);
+  });
+
+  it('computes stats for humidity_pct', () => {
+    const readings = makeReadings([0, 0, 0]).map((r, i) => ({
+      ...r,
+      humidity_pct: [40, 60, 80][i],
+    }));
+
+    const stats = computeStats(readings, 'humidity_pct');
+
+    expect(stats!.max).toBe(80);
+    expect(stats!.min).toBe(40);
+    expect(stats!.avg).toBe(60);
+    expect(stats!.current).toBe(80);
+    expect(stats!.rangeDelta).toBe(40);
   });
 });
