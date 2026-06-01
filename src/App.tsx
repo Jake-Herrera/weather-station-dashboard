@@ -35,7 +35,7 @@ function App() {
       {loading && <p className="mt-4 text-gray-400">Loading…</p>}
       {error && <p className="mt-4 text-red-400">Error: {error}</p>}
 
-      <div className="mt-6 grid grid-cols-1 gap-4 lg:grid-cols-3">
+      <div className="mt-6 grid grid-cols-1 gap-4 lg:grid-cols-4">
         <MetricCard metric="temp_c" stats={tempStats} />
         <MetricCard metric="pressure_hpa" stats={pressureStats} />
         <MetricCard metric="altitude_m" stats={altitudeStats} />
