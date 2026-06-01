@@ -1,7 +1,9 @@
+import { Fragment } from 'react';
 import {
   ComposedChart,
   Area,
   Line,
+  Bar,
   XAxis,
   YAxis,
   CartesianGrid,
@@ -11,12 +13,14 @@ import {
 } from 'recharts';
 import { formatChartData } from '@/services/format-chart-data';
 import type { Reading } from '@/types/reading';
+import type { MetricChartMetaData } from '@/types/metricChart';
 
 type Props = {
   readings: Reading[];
+  metadata: MetricChartMetaData[];
 };
 
-export function TrendChart({ readings }: Props) {
+export function TrendChart({ readings, metadata }: Props) {
   const data = formatChartData(readings);
 
   if (data.length === 0) {
@@ -36,33 +40,11 @@ export function TrendChart({ readings }: Props) {
       <ResponsiveContainer width="100%" height={420}>
         <ComposedChart data={data}>
           {/* Gradient definition for the temperature area fill */}
-          <defs>
-            <linearGradient id="tempGradient" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#f59e0b" stopOpacity={0.4} />
-              <stop offset="100%" stopColor="#f59e0b" stopOpacity={0} />
-            </linearGradient>
-          </defs>
+
 
           <CartesianGrid strokeDasharray="3 3" stroke="#2e303a" />
-          <XAxis dataKey="time" stroke="#9ca3af" fontSize={12} />
 
-          {/* Left axis: temperature */}
-          <YAxis
-            yAxisId="temp"
-            stroke="#f59e0b"
-            fontSize={12}
-            domain={['auto', 'auto']}
-          />
-          {/* Right axis: pressure */}
-          <YAxis
-            yAxisId="pressure"
-            orientation="right"
-            stroke="#38bdf8"
-            fontSize={12}
-            domain={['auto', 'auto']}
-          />
-          {/* Hidden axis: altitude */}
-          <YAxis yAxisId="altitude" width={0} hide domain={['auto', 'auto']} />
+          <XAxis dataKey="time" stroke="#9ca3af" fontSize={12} />
 
           <Tooltip
             contentStyle={{
@@ -71,42 +53,74 @@ export function TrendChart({ readings }: Props) {
               borderRadius: '8px',
             }}
           />
+
           <Legend />
 
-          {/* Temperature: solid line + translucent area fill */}
-          <Area
-            yAxisId="temp"
-            type="monotone"
-            dataKey="temp_c"
-            name="Temperatura"
-            stroke="#f59e0b"
-            strokeWidth={2}
-            fill="url(#tempGradient)"
-            dot={false}
-          />
-
-          {/* Pressure: solid line */}
-          <Line
-            yAxisId="pressure"
-            type="monotone"
-            dataKey="pressure_hpa"
-            name="Presión"
-            stroke="#38bdf8"
-            dot={false}
-            strokeWidth={2}
-          />
-
-          {/* Altitude: dashed line */}
-          <Line
-            yAxisId="altitude"
-            type="monotone"
-            dataKey="altitude_m"
-            name="Altitud"
-            stroke="#a78bfa"
-            strokeDasharray="3 3"
-            dot={false}
-            strokeWidth={2}
-          />
+          {metadata.map((data) =>{
+            switch(data.type) {
+              case "area":
+                return (
+                  <Fragment key={data.id}>
+                    <YAxis
+                      yAxisId={data.id}
+                      stroke={data.color}
+                      fontSize={12}
+                      {...data.yAxisData}
+                    />
+                    <defs>
+                      <linearGradient id={`${data.id}Gradient`} x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stopColor={data.color} stopOpacity={0.4} />
+                        <stop offset="100%" stopColor={data.color} stopOpacity={0} />
+                      </linearGradient>
+                    </defs>
+                    <Area
+                      yAxisId={data.id}
+                      dataKey={data.key}
+                      stroke={data.color}
+                      strokeWidth={2}
+                      fill={`url(#${data.id}Gradient)`}
+                      {...data.chartData}
+                    />
+                  </Fragment>
+                );
+              case "line":
+                return (
+                  <Fragment key={data.id}>
+                    <YAxis
+                      yAxisId={data.id}
+                      stroke={data.color}
+                      fontSize={12}
+                      {...data.yAxisData}
+                    />
+                    <Line
+                      yAxisId={data.id}
+                      dataKey={data.key}
+                      stroke={data.color}
+                      {...data.chartData}
+                    />
+                  </Fragment>
+                );
+              case "bar":
+                return (
+                  <Fragment key={data.id}>
+                    <YAxis
+                      yAxisId={data.id}
+                      stroke={data.color}
+                      fontSize={12}
+                      {...data.yAxisData}
+                    />
+                    <Bar
+                      yAxisId={data.id}
+                      dataKey={data.key}
+                      fill={data.color}
+                      {...data.chartData}
+                    />
+                  </Fragment>
+                );
+              default:
+                return null;
+            }
+          })}
         </ComposedChart>
       </ResponsiveContainer>
     </div>

@@ -9,8 +9,9 @@ import type { TimeRange } from '@/types/reading';
 import { TrendChart } from '@/components/features/TrendChart';
 import { RealTimer } from '@/components/features/RealTimer';
 import DeviceMeta from './components/features/DeviceMeta';
+import { chartTemperatureAndHumidity, chartPressureAndAltitude } from '@/constants/metrics';
 
-const DEVICE_ID = import.meta.env.VITE_DEVICE_ID ?? 'esp32-01';
+const DEVICE_ID = import.meta.env.VITE_DEVICE_ID ?? 'esp32-tes';
 
 function App() {
   const [range, setRange] = useState<TimeRange>(DEFAULT_RANGE);
@@ -41,8 +42,9 @@ function App() {
         <MetricCard metric="altitude_m" stats={altitudeStats} />
         <MetricCard metric="humidity_pct" stats={humidityStats} />
       </div>
-      <div className="mt-4">
-        <TrendChart readings={visibleReadings} />
+      <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-2">
+        <TrendChart readings={visibleReadings} metadata={chartTemperatureAndHumidity}/>
+        <TrendChart readings={visibleReadings} metadata={chartPressureAndAltitude}/>
       </div>
     </div>
   );
