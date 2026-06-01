@@ -1,5 +1,11 @@
-import type { CurveType } from "recharts";
 import type { MetricKey } from "./metrics"
+
+type CurveType =
+  | 'basis' | 'basisClosed' | 'basisOpen'
+  | 'bumpX' | 'bumpY' | 'bump'
+  | 'linear' | 'linearClosed' | 'natural'
+  | 'monotoneX' | 'monotoneY' | 'monotone'
+  | 'step' | 'stepBefore' | 'stepAfter';
 
 export type ChartData = {
     type?: CurveType;
