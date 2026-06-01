@@ -3,8 +3,8 @@ import { RangeFilter } from '@/components/features/RangeFilter';
 import { MetricCard } from '@/components/features/MetricCard';
 import { DEFAULT_RANGE } from '@/constants/ranges';
 import { useReadings } from '@/hooks/useReadings';
-import { filterReadingsByRange } from '@/services/filter-readings';
 import { computeStats } from '@/services/compute-stats';
+import { downsampleReadings } from '@/services/downsample-readings';
 import type { TimeRange } from '@/types/reading';
 import { TrendChart } from '@/components/features/TrendChart';
 import { RealTimer } from '@/components/features/RealTimer';
@@ -15,14 +15,14 @@ const DEVICE_ID = import.meta.env.VITE_DEVICE_ID ?? 'esp32-tes';
 
 function App() {
   const [range, setRange] = useState<TimeRange>(DEFAULT_RANGE);
-  const { readings, loading, error } = useReadings(DEVICE_ID);
+  const { readings, loading, error } = useReadings(DEVICE_ID, range);
 
-  const visibleReadings = filterReadingsByRange(readings, range);
+  const chartReadings = downsampleReadings(readings, range);
 
-  const tempStats = computeStats(visibleReadings, 'temp_c');
-  const pressureStats = computeStats(visibleReadings, 'pressure_hpa');
-  const altitudeStats = computeStats(visibleReadings, 'altitude_m');
-  const humidityStats = computeStats(visibleReadings, 'humidity_pct');
+  const tempStats = computeStats(readings, 'temp_c');
+  const pressureStats = computeStats(readings, 'pressure_hpa');
+  const altitudeStats = computeStats(readings, 'altitude_m');
+  const humidityStats = computeStats(readings, 'humidity_pct');
 
   return (
     <div className="min-h-screen bg-atmosphere px-8 py-7">
@@ -30,7 +30,7 @@ function App() {
         <DeviceMeta deviceId={DEVICE_ID} />
         <RealTimer/>
       </div>
-      
+
       <RangeFilter selectedRange={range} onChange={setRange} />
 
       {loading && <p className="mt-4 text-gray-400">Loading…</p>}
@@ -43,8 +43,8 @@ function App() {
         <MetricCard metric="humidity_pct" stats={humidityStats} />
       </div>
       <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-2">
-        <TrendChart readings={visibleReadings} metadata={chartTemperatureAndHumidity}/>
-        <TrendChart readings={visibleReadings} metadata={chartPressureAndAltitude}/>
+        <TrendChart readings={chartReadings} metadata={chartTemperatureAndHumidity}/>
+        <TrendChart readings={chartReadings} metadata={chartPressureAndAltitude}/>
       </div>
     </div>
   );

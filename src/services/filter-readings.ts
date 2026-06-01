@@ -1,7 +1,7 @@
 import type { Reading, TimeRange } from '@/types/reading';
 
 // Milliseconds covered by each range.
-const RANGE_TO_MS: Record<TimeRange, number> = {
+export const RANGE_TO_MS: Record<TimeRange, number> = {
   '1h': 1 * 60 * 60 * 1000,
   '6h': 6 * 60 * 60 * 1000,
   '24h': 24 * 60 * 60 * 1000,
