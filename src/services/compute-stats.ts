@@ -1,7 +1,5 @@
 import type { Reading } from '@/types/reading';
-
-// Which numeric metric of a reading we want stats for.
-export type MetricKey = 'temp_c' | 'pressure_hpa' | 'altitude_m';
+import type { MetricKey } from '@/types/metrics';
 
 export type MetricStats = {
   current: number; // most recent value
