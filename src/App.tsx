@@ -10,6 +10,7 @@ import { TrendChart } from '@/components/features/TrendChart';
 import { RealTimer } from '@/components/features/RealTimer';
 import DeviceMeta from './components/features/DeviceMeta';
 import { chartTemperatureAndHumidity, chartPressureAndAltitude } from '@/constants/metrics';
+import { DashboardSkeleton } from '@/components/features/DashboardSkeleton';
 
 const DEVICE_ID = import.meta.env.VITE_DEVICE_ID ?? 'esp32-tes';
 
@@ -33,19 +34,24 @@ function App() {
 
       <RangeFilter selectedRange={range} onChange={setRange} />
 
-      {loading && <p className="mt-4 text-gray-400">Loading…</p>}
       {error && <p className="mt-4 text-red-400">Error: {error}</p>}
 
-      <div className="mt-6 grid grid-cols-1 gap-4 lg:grid-cols-4">
-        <MetricCard metric="temp_c" stats={tempStats} />
-        <MetricCard metric="pressure_hpa" stats={pressureStats} />
-        <MetricCard metric="altitude_m" stats={altitudeStats} />
-        <MetricCard metric="humidity_pct" stats={humidityStats} />
-      </div>
-      <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-2">
-        <TrendChart readings={chartReadings} metadata={chartTemperatureAndHumidity}/>
-        <TrendChart readings={chartReadings} metadata={chartPressureAndAltitude}/>
-      </div>
+      {loading ? (
+        <DashboardSkeleton />
+      ) : (
+        <>
+            <div className="mt-6 grid grid-cols-1 gap-4 lg:grid-cols-4">
+              <MetricCard metric="temp_c" stats={tempStats} />
+              <MetricCard metric="pressure_hpa" stats={pressureStats} />
+              <MetricCard metric="altitude_m" stats={altitudeStats} />
+              <MetricCard metric="humidity_pct" stats={humidityStats} />
+            </div>
+            <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-2">
+              <TrendChart readings={chartReadings} metadata={chartTemperatureAndHumidity}/>
+              <TrendChart readings={chartReadings} metadata={chartPressureAndAltitude}/>
+            </div>      
+        </>
+      ) }
     </div>
   );
 }
