@@ -9,7 +9,7 @@ const BUCKET_MS: Record<TimeRange, number> = {
 };
 
 function avg(group: Reading[], key: keyof Omit<Reading, 'ts'>): number {
-  return group.reduce((sum, r) => sum + r[key], 0) / group.length;
+  return Number((group.reduce((sum, r) => sum + r[key], 0) / group.length).toFixed(2));
 }
 
 export function downsampleReadings(readings: Reading[], range: TimeRange): Reading[] {
