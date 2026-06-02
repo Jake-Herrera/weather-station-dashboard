@@ -47,8 +47,8 @@ function App() {
               <MetricCard metric="pressure_hpa" stats={pressureStats} />
             </div>
             <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-2">
-              <TrendChart readings={chartReadings} metadata={chartTemperatureAndHumidity}/>
-              <TrendChart readings={chartReadings} metadata={chartPressureAndAltitude}/>
+              <TrendChart readings={chartReadings} metadata={chartTemperatureAndHumidity} range={range}/>
+              <TrendChart readings={chartReadings} metadata={chartPressureAndAltitude}  range={range}/>
             </div>      
         </>
       ) }

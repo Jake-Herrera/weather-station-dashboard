@@ -18,9 +18,10 @@ import type { MetricChartMetaData } from '@/types/metricChart';
 type Props = {
   readings: Reading[];
   metadata: MetricChartMetaData[];
+  range: string;
 };
 
-export function TrendChart({ readings, metadata }: Props) {
+export function TrendChart({ readings, metadata, range }: Props) {
   const data = formatChartData(readings);
 
   if (data.length === 0) {
@@ -33,10 +34,12 @@ export function TrendChart({ readings, metadata }: Props) {
 
   return (
     <div className="rounded-xl border border-gray-700 bg-transparent p-5">
-      <p className="mb-4 text-xs tracking-widest text-gray-400">
-        TENDENCIA · SERIES ATMOSFÉRICAS
+      <p className="mb-1 text-xs tracking-widest text-gray-400">
+        TENDENCIA · {range}
       </p>
-
+      <p className="mb-4 text-[17px] tracking-widest text-white font-normal">
+        SERIES ATMOSFÉRICAS
+      </p>
       <ResponsiveContainer width="100%" height={420}>
         <ComposedChart data={data}>
           {/* Gradient definition for the temperature area fill */}
