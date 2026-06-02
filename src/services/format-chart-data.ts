@@ -1,13 +1,7 @@
 import type { Reading } from '@/types/reading';
 
 // A reading shaped for the chart: keeps the raw values + a human-readable time label.
-export type ChartPoint = {
-  time: string;        // formatted label for the X axis (e.g. "20:34")
-  temp_c: number;
-  pressure_hpa: number;
-  altitude_m: number;
-  humidity_pct : number;
-};
+export type ChartPoint = Omit<Reading, 'ts'> & { time: string };
 
 // Pure function: turn readings into chart points with a formatted time label.
 export function formatChartData(readings: Reading[]): ChartPoint[] {

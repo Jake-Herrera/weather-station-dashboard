@@ -1,6 +1,8 @@
+import type { Reading } from '@/types/reading';
+
 export type MetricLabel = "TEMPERATURA" | "PRESIÓN" | "ALTITUD" | "HUMEDAD";
 
-export type MetricKey = 'temp_c' | 'pressure_hpa' | 'altitude_m' | 'humidity_pct';
+export type MetricKey = keyof Omit<Reading, 'ts'>;
 
 export type MetricUnit = '°C' | 'hPa' | 'm' | '%';
 

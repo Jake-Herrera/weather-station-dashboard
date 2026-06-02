@@ -12,13 +12,13 @@ import {
   ResponsiveContainer,
 } from 'recharts';
 import { formatChartData } from '@/services/format-chart-data';
-import type { Reading } from '@/types/reading';
+import type { Reading, TimeRange } from '@/types/reading';
 import type { MetricChartMetaData } from '@/types/metricChart';
 
 type Props = {
   readings: Reading[];
   metadata: MetricChartMetaData[];
-  range: string;
+  range: TimeRange;
 };
 
 export function TrendChart({ readings, metadata, range }: Props) {

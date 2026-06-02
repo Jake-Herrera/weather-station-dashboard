@@ -3,7 +3,7 @@ import { get, ref } from 'firebase/database';
 
 import { db } from '@/lib/firebase';
 
-import type { DeviceMeta } from '@/types/reading';
+import type { DeviceMeta } from '@/types/device';
 
 export function useDeviceMeta(deviceId: string) {
   const [device, setDevice] = useState<DeviceMeta | null>(null);

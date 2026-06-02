@@ -11,7 +11,7 @@ import {
 import { db } from '@/lib/firebase';
 
 import type { Reading, TimeRange } from '@/types/reading';
-import { RANGE_TO_MS } from '@/services/filter-readings';
+import { RANGE_TO_MS } from '@/constants/ranges';
 
 type State = {
   readings: Reading[];

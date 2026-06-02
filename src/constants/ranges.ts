@@ -8,5 +8,12 @@ export const RANGES: TimeRange[] = [
   '30d',
 ];
 
-export const DEFAULT_RANGE: TimeRange =
-  '24h';
+export const DEFAULT_RANGE: TimeRange = '24h';
+
+export const RANGE_TO_MS: Record<TimeRange, number> = {
+  '1h':  1  * 60 * 60 * 1000,
+  '6h':  6  * 60 * 60 * 1000,
+  '24h': 24 * 60 * 60 * 1000,
+  '7d':  7  * 24 * 60 * 60 * 1000,
+  '30d': 30 * 24 * 60 * 60 * 1000,
+};
