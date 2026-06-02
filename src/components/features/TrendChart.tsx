@@ -14,6 +14,7 @@ import {
 import { formatChartData } from '@/services/format-chart-data';
 import type { Reading, TimeRange } from '@/types/reading';
 import type { MetricChartMetaData } from '@/types/metricChart';
+import { RANGE_LABEL } from '@/constants/ranges';
 
 type Props = {
   readings: Reading[];
@@ -35,7 +36,7 @@ export function TrendChart({ readings, metadata, range }: Props) {
   return (
     <div className="rounded-xl border border-gray-700 bg-transparent p-5">
       <p className="mb-1 text-xs tracking-widest text-gray-400">
-        TENDENCIA · {range}
+        TENDENCIA · {RANGE_LABEL[range]}
       </p>
       <p className="mb-4 text-[17px] tracking-widest text-white font-normal">
         SERIES ATMOSFÉRICAS
