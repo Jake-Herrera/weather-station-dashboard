@@ -34,12 +34,12 @@
 
 ### Key objectives (what success looks like)
 
-- [x] Show the three live metrics (temperature, pressure, altitude)
+- [x] Show the four live metrics (temperature, humidity, altitude, pressure)
 - [x] Compute and show stats per metric (max, min, average, range delta) for the selected range
-- [ ] Plot a time-series trend chart with a dual axis (temp + pressure)
+- [x] Plot two trend charts with dual axis (temp+humidity, altitude+pressure)
 - [x] Switch the time range (1h / 6h / 24h / 7d / 30d)
 - [x] Update in real time as new readings arrive (Firebase)
-- [ ] Deploy publicly on Vercel
+- [x] Deploy publicly on Vercel
 
 ---
 
@@ -139,8 +139,8 @@ weather-station-dashboard/
 │   ├── hooks/               # useReadings, useLiveReading, useDeviceMeta, ...
 │   ├── lib/                 # api client, firebase client, helpers
 │   ├── services/            # stats calculation (pure functions) — testable
-│   ├── types/               # Reading, Stats, DeviceMeta, TimeRange
-│   └── constants/           # ranges, colors, device id
+│   ├── types/               # reading.ts, metrics.ts, metricChart.ts, device.ts
+│   └── constants/           # ranges.ts (RANGES, DEFAULT_RANGE, RANGE_TO_MS, RANGE_LABEL), metrics.ts
 ├── public/
 ├── tests/
 │   └── unit/                # Vitest tests (stats functions, hooks)
@@ -163,25 +163,33 @@ type Reading = {
   temp_c: number;        // temperature °C
   pressure_hpa: number;  // pressure hPa
   altitude_m: number;    // altitude m (sensor-measured)
+  humidity_pct: number;  // relative humidity %
 };
+
+// Derived from Reading — always in sync, never manually maintained
+type MetricKey = keyof Omit<Reading, 'ts'>;
 
 // Supported time ranges (must match the backend)
 type TimeRange = '1h' | '6h' | '24h' | '7d' | '30d';
 
 // Stats computed in the frontend for one metric over the selected range
 type MetricStats = {
+  current: number;
   max: number;
   min: number;
   avg: number;
   rangeDelta: number;    // max - min
 };
 
-// Device metadata (read from Firebase devices/<id>)
+// Device metadata (read from Firebase devices/<id>) — lives in types/device.ts
 type DeviceMeta = {
   name: string;          // e.g. "ESP32-01"
   location: string;      // e.g. "San José, CR"
   elevation_m?: number;  // geographic elevation of the site (NOT the sensor reading)
 };
+
+// Chart point — derived from Reading to avoid duplicating metric fields
+type ChartPoint = Omit<Reading, 'ts'> & { time: string };
 ```
 
 > **⚠️ Altitude vs elevation:** `Reading.altitude_m` is the value the barometer computes and
@@ -199,10 +207,10 @@ type DeviceMeta = {
 | Read readings from Firebase      | ✅ Done        | `useReadings` (real-time subscription)  |
 | Range filtering (client-side)    | ✅ Done        | `filterReadingsByRange` (pure, tested)  |
 | Stats per metric (max/min/avg/Δ) | ✅ Done        | `computeStats` (pure, tested)           |
-| Three metric cards (temp/press/alt) | ✅ Done     | `MetricCard` with current value + stats |
+| Four metric cards (temp/humidity/alt/press) | ✅ Done | `MetricCard` with current value + stats |
 | Time-range filter (1h…30d)       | ✅ Done        | `RangeFilter` (glassmorphism style)     |
 | Real-time updates (Firebase)     | ✅ Done        | via `useReadings` `onValue` subscription|
-| Trend chart (dual axis + altitude)| ✅ Done       | Recharts `ComposedChart` (temp area + 2 lines) |
+| Two trend charts (dual axis)     | ✅ Done        | temp+humidity / altitude+pressure via `MetricChartMetaData` config |
 | Device header (name + location)  | ✅ Done        | `DeviceMeta` wired to `useDeviceMeta` + lucide icon |
 | Live clock + "Real time" badge   | ✅ Done        | `RealTimer` (updates every second)      |
 | Atmospheric background + styling | ✅ Done        | gradients + glassmorphism (matching design) |
@@ -379,12 +387,16 @@ fix/xxx       → bugfixes
 | 2026-05-23  | Read all from Firebase, filter client-side| Simplest for current volume; real-time for free. Backend `/readings` unused for now |
 | 2026-05-24  | `ComposedChart` (temp area + lines)       | Temperature as filled area; pressure/altitude as lines on separate axes |
 | 2026-05-24  | lucide-react for icons                    | Standard React icon set; no SVG files to manage; Tailwind-styleable |
+| 2026-06-02  | `MetricKey` derived as `keyof Omit<Reading, 'ts'>` | Prevents manual sync between `Reading` fields and `MetricKey` union |
+| 2026-06-02  | `ChartPoint` derived as `Omit<Reading, 'ts'> & { time: string }` | Avoids duplicating metric field declarations |
+| 2026-06-02  | `DeviceMeta` moved to `types/device.ts`   | Device metadata is unrelated to a sensor reading — separate concerns |
+| 2026-06-02  | `RANGE_TO_MS` and `RANGE_LABEL` co-located in `constants/ranges.ts` | All range-related constants in one place; adding a new range touches one file |
 
 ---
 
 ## 14. Current Project Status
 
-**Last updated:** `2026-05-25`
+**Last updated:** `2026-06-02`
 
 ### What already exists and works
 
@@ -402,7 +414,7 @@ fix/xxx       → bugfixes
 - [x] `RealTimer` — live clock (updates every second) + "Tiempo real" indicator badge
 - [x] Atmospheric gradient background (`bg-atmosphere`) + glassmorphism utilities
 - [x] Unit tests passing (Vitest) for stats; tests included in `tsconfig.app.json`
-- [x] Types unified in `types/reading.ts` (Reading, TimeRange, DeviceMeta)
+- [x] Types split by concern: `reading.ts` (Reading, TimeRange), `device.ts` (DeviceMeta), `metrics.ts` (MetricKey derived), `metricChart.ts`
 - [x] Firebase production rules active + `devices` node created (see data-layer)
 - [x] Header assembled: `DeviceMeta` (left) + `RealTimer` (right), responsive (`flex-col-reverse` mobile / `justify-between` desktop)
 - [x] Deployed to Vercel (`weather-station-dashboard-hazel.vercel.app`)
