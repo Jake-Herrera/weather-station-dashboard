@@ -1,0 +1,8 @@
+{
+  "git": {
+    "deploymentEnabled": {
+      "main": true
+    }
+  },
+  "ignoreCommand": "git diff HEAD^ HEAD --quiet -- src/ public/ package.json pnpm-lock.yaml vite.config.ts tsconfig.json"
+}
