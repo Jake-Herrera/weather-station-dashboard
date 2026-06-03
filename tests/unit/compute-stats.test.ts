@@ -63,4 +63,32 @@ describe('computeStats', () => {
     expect(stats!.current).toBe(80);
     expect(stats!.rangeDelta).toBe(40);
   });
+
+  it('all identical values produce a rangeDelta of 0', () => {
+    const readings = makeReadings([15, 15, 15]);
+
+    const stats = computeStats(readings, 'temp_c');
+
+    expect(stats!.rangeDelta).toBe(0);
+  });
+
+  it('humidity_pct value of 0 is valid and is used in min and avg computation', () => {
+    const readings = makeReadings([0, 0, 0]).map((r, i) => ({
+      ...r,
+      humidity_pct: [0, 50, 100][i],
+    }));
+
+    const stats = computeStats(readings, 'humidity_pct');
+
+    expect(stats!.min).toBe(0);
+    expect(stats!.avg).toBeCloseTo(50);
+  });
+
+  it('avg is not truncated to an integer when the result has decimal places', () => {
+    const readings = makeReadings([1, 2]);
+
+    const stats = computeStats(readings, 'temp_c');
+
+    expect(stats!.avg).toBe(1.5);
+  });
 });
