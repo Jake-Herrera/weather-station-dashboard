@@ -1,6 +1,10 @@
 # Weather Station Dashboard
 
-Real-time dashboard for an IoT weather station built with an **ESP32 + BMP280** sensor. Streams live readings from Firebase Realtime Database and renders them as metric cards and trend charts.
+🔗 **Live demo:** https://weather-station-dashboard-hazel.vercel.app
+
+![Dashboard screenshot](./docs/screenshots/dashboard.png)
+
+Real-time dashboard for an IoT weather station built with an **ESP32 + BME280** sensor. Streams live readings from Firebase Realtime Database and renders them as metric cards and trend charts.
 
 ## Features
 
@@ -16,7 +20,7 @@ Real-time dashboard for an IoT weather station built with an **ESP32 + BMP280** 
 | Layer | Technology |
 |---|---|
 | UI | React 19 + TypeScript |
-| Build | Vite 8 |
+| Build | Vite 6.x |
 | Styling | Tailwind CSS v4 |
 | Charts | Recharts |
 | Database | Firebase Realtime Database |
@@ -30,7 +34,7 @@ Real-time dashboard for an IoT weather station built with an **ESP32 + BMP280** 
 - Node.js 20+
 - pnpm
 - A Firebase project with Realtime Database enabled
-- An ESP32 device writing readings to `readings/<DEVICE_ID>` in the database
+- A running backend (Express on Railway) that receives ESP32 readings and writes them to Firebase under `readings/<DEVICE_ID>`
 
 ### Installation
 
@@ -82,7 +86,7 @@ pnpm test:run
 
 ## Data Shape
 
-Each reading written by the ESP32 must follow this structure under `readings/<DEVICE_ID>/<key>`:
+The ESP32 sends readings to the backend via `POST /data`; the backend writes each one to Firebase under `readings/<DEVICE_ID>/<key>` in this structure:
 
 ```json
 {
@@ -107,3 +111,8 @@ src/
 ├── services/              # Pure functions: stats, downsampling, chart formatting
 └── types/                 # TypeScript types (Reading, TimeRange, ...)
 ```
+
+## Related repos
+
+- [weather-station-backend](https://github.com/Jake-Herrera/weather-station-backend)
+- [weather-station-firmware](https://github.com/Jake-Herrera/weather-station-firmware)
