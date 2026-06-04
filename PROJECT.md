@@ -53,12 +53,12 @@
 | Technology     | Version   | Purpose                          |
 |----------------|-----------|----------------------------------|
 | React          | `19.x`    | UI framework                     |
-| TypeScript     | `5.x`     | Type safety (strict mode)        |
-| Vite           | `6.x`     | Bundler / dev server             |
+| TypeScript     | `6.x`     | Type safety (strict mode)        |
+| Vite           | `8.x`     | Bundler / dev server             |
 | Tailwind CSS   | `4.x`     | Styling (utility-first)          |
-| Recharts       | `2.x`     | Charts (time-series, dual axis)  |
-| lucide-react   | `0.x`     | Icons (header, UI)               |
-| Firebase (web) | `11.x`    | Real-time reads (client SDK)     |
+| Recharts       | `3.x`     | Charts (time-series, dual axis)  |
+| lucide-react   | `1.x`     | Icons (header, UI)               |
+| Firebase (web) | `12.x`    | Real-time reads (client SDK)     |
 
 ### Tooling
 
@@ -71,9 +71,10 @@
 
 ### Infrastructure
 
-| Tool        | Purpose             |
-|-------------|---------------------|
-| Vercel      | Hosting (free tier) |
+| Tool            | Purpose             |
+|-----------------|---------------------|
+| Vercel          | Hosting (free tier) |
+| GitHub Actions  | CI (lint, type-check, tests, build) |
 
 ### External services
 
@@ -135,15 +136,22 @@ weather-station-dashboard/
 ├── src/
 │   ├── components/
 │   │   ├── ui/              # Generic reusable bits (Card, RangeButton, ...)
-│   │   └── features/        # Dashboard-specific (MetricCard, TrendChart, RangeFilter, ...)
-│   ├── hooks/               # useReadings, useLiveReading, useDeviceMeta, ...
-│   ├── lib/                 # api client, firebase client, helpers
-│   ├── services/            # stats calculation (pure functions) — testable
+│   │   └── features/        # MetricCard, TrendChart, RangeFilter, DeviceMeta, RealTimer, DashboardSkeleton
+│   ├── hooks/               # useReadings, useDeviceMeta
+│   ├── lib/                 # api client, firebase client
+│   ├── services/            # compute-stats, filter-readings, downsample-readings, format-chart-data (pure, tested)
 │   ├── types/               # reading.ts, metrics.ts, metricChart.ts, device.ts
 │   └── constants/           # ranges.ts (RANGES, DEFAULT_RANGE, RANGE_TO_MS, RANGE_LABEL), metrics.ts
 ├── public/
 ├── tests/
-│   └── unit/                # Vitest tests (stats functions, hooks)
+│   └── unit/
+│       ├── helpers/         # firebase-mock.ts
+│       ├── components/      # MetricCard.test.tsx, RangeFilter.test.tsx
+│       ├── hooks/           # useReadings.test.ts, useDeviceMeta.test.ts
+│       └── services/        # compute-stats.test.ts, filter-readings.test.ts, format-chart-data.test.ts
+├── .github/
+│   └── workflows/
+│       └── ci.yml           # lint → type-check → tests → build
 ├── .env.example             # required env vars (no values)
 ├── PROJECT.md               # ← This file
 └── README.md
@@ -336,25 +344,26 @@ pnpm dev
 
 ### Scripts
 
-| Script           | Description                       |
-|------------------|-----------------------------------|
-| `pnpm dev`       | Dev server (hot reload)           |
-| `pnpm build`     | Production build                  |
-| `pnpm preview`   | Preview the production build      |
-| `pnpm test`      | Unit tests (Vitest)               |
-| `pnpm test:run`  | Unit tests once (CI mode)         |
-| `pnpm typecheck` | TypeScript check                  |
-| `pnpm lint`      | ESLint                            |
+| Script              | Description                                   |
+|---------------------|-----------------------------------------------|
+| `pnpm dev`          | Dev server (hot reload)                       |
+| `pnpm build`        | Production build                              |
+| `pnpm preview`      | Preview the production build                  |
+| `pnpm test`         | Unit tests (Vitest, watch mode)               |
+| `pnpm test:run`     | Unit tests once (CI mode)                     |
+| `pnpm type-check`   | TypeScript check (no emit)                    |
+| `pnpm lint`         | ESLint                                        |
+| `pnpm docs:update`  | Re-generate README.md + PROJECT.md via Claude |
 
 ---
 
 ## 11. Testing
 
 - **Unit tests:** Vitest (+ React Testing Library where a component has real logic).
-- **Primary targets:** the **stats functions** in `services/` (pure, easy to test) — exactly
-  the kind of logic worth protecting (max/min/avg/range over a readings array).
+- **Coverage:** services (`compute-stats`, `filter-readings`, `format-chart-data`), hooks (`useReadings`, `useDeviceMeta`), and components (`MetricCard`, `RangeFilter`).
+- **Firebase mock:** `tests/unit/helpers/firebase-mock.ts` provides a deterministic Firebase stub for hook tests.
 - **Vitest needs the `@` alias** configured in `vitest.config.ts` (same gotcha as the backend).
-- **What to test:** stats math, data-shaping helpers, custom hooks with logic.
+- **What to test:** stats math, data-shaping helpers, custom hooks with logic, components with non-trivial rendering logic.
 - **What NOT to test:** trivial presentational markup, Recharts internals, third-party libs.
 
 ---
@@ -391,12 +400,15 @@ fix/xxx       → bugfixes
 | 2026-06-02  | `ChartPoint` derived as `Omit<Reading, 'ts'> & { time: string }` | Avoids duplicating metric field declarations |
 | 2026-06-02  | `DeviceMeta` moved to `types/device.ts`   | Device metadata is unrelated to a sensor reading — separate concerns |
 | 2026-06-02  | `RANGE_TO_MS` and `RANGE_LABEL` co-located in `constants/ranges.ts` | All range-related constants in one place; adding a new range touches one file |
+| 2026-06-03  | `downsample-readings` for 24h/7d/30d ranges                        | Bucket-average readings to keep chart rendering performant on larger time windows |
+| 2026-06-03  | GitHub Actions CI (lint → type-check → tests → build)              | Catch regressions on every push; mirrors what Vercel does before a deploy |
+| 2026-06-03  | `docs:update` script using Claude Code headless mode               | Keep README + PROJECT.md in sync after each feature sprint without manual effort |
 
 ---
 
 ## 14. Current Project Status
 
-**Last updated:** `2026-06-02`
+**Last updated:** `2026-06-03`
 
 ### What already exists and works
 
@@ -405,19 +417,25 @@ fix/xxx       → bugfixes
 - [x] Firebase client connected (`lib/firebase.ts`), reading live data
 - [x] `useReadings` — real-time subscription to `readings/<deviceId>`
 - [x] `useDeviceMeta` — reads `devices/<deviceId>` (now wired into the header)
-- [x] `filterReadingsByRange` — client-side range filtering (pure, unit-tested)
-- [x] `computeStats` — max/min/avg/rangeDelta per metric (pure, unit-tested)
+- [x] `filter-readings` — client-side range filtering (pure, unit-tested)
+- [x] `compute-stats` — max/min/avg/rangeDelta per metric (pure, unit-tested)
+- [x] `downsample-readings` — time-bucket averaging for 24h/7d/30d ranges (performance)
+- [x] `format-chart-data` — shapes readings into Recharts-ready `ChartPoint[]` (unit-tested)
+- [x] `DashboardSkeleton` — loading skeleton shown while Firebase data is fetching
 - [x] `RangeFilter` — five range buttons, glassmorphism styling
 - [x] `MetricCard` — shows current value + stats; three cards (temp/pressure/altitude)
 - [x] `TrendChart` — Recharts ComposedChart: temp area + pressure/altitude lines, dual axis
 - [x] `DeviceMeta` — header with device name + location + lucide icon
 - [x] `RealTimer` — live clock (updates every second) + "Tiempo real" indicator badge
 - [x] Atmospheric gradient background (`bg-atmosphere`) + glassmorphism utilities
-- [x] Unit tests passing (Vitest) for stats; tests included in `tsconfig.app.json`
+- [x] Unit tests passing (Vitest) covering services, hooks, and components
+- [x] Firebase mock helper (`tests/unit/helpers/firebase-mock.ts`) for deterministic hook tests
 - [x] Types split by concern: `reading.ts` (Reading, TimeRange), `device.ts` (DeviceMeta), `metrics.ts` (MetricKey derived), `metricChart.ts`
 - [x] Firebase production rules active + `devices` node created (see data-layer)
 - [x] Header assembled: `DeviceMeta` (left) + `RealTimer` (right), responsive (`flex-col-reverse` mobile / `justify-between` desktop)
 - [x] Deployed to Vercel (`weather-station-dashboard-hazel.vercel.app`)
+- [x] GitHub Actions CI (lint → type-check → tests → build) on push/PR to `main` and `develop`
+- [x] `docs:update` script — auto-regenerates README + PROJECT.md via Claude Code
 
 ### In progress right now
 

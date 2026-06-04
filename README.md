@@ -19,12 +19,13 @@ Real-time dashboard for an IoT weather station built with an **ESP32 + BME280** 
 
 | Layer | Technology |
 |---|---|
-| UI | React 19 + TypeScript |
-| Build | Vite 6.x |
+| UI | React 19 + TypeScript 6 |
+| Build | Vite 8.x |
 | Styling | Tailwind CSS v4 |
-| Charts | Recharts |
-| Database | Firebase Realtime Database |
+| Charts | Recharts 3.x |
+| Database | Firebase Realtime Database (SDK 12.x) |
 | Testing | Vitest + Testing Library |
+| CI | GitHub Actions |
 | Package manager | pnpm |
 
 ## Getting Started
@@ -83,6 +84,8 @@ pnpm test
 # Single run
 pnpm test:run
 ```
+
+Tests cover services (`compute-stats`, `filter-readings`, `format-chart-data`), hooks (`useReadings`, `useDeviceMeta`), and components (`MetricCard`, `RangeFilter`).
 
 ## Data Shape
 
