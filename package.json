@@ -11,7 +11,7 @@
     "preview": "vite preview",
     "test": "vitest",
     "test:run": "vitest run",
-    "docs:update": "claude 'Read .claude/prompts/update-docs.md and follow the rules to update README.md and PROJECT.md'"
+    "docs:update": "claude -p 'Read .claude/prompts/update-docs.md and follow the rules to update README.md and PROJECT.md'"
   },
   "dependencies": {
     "firebase": "^12.13.0",
