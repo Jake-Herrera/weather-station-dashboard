@@ -30,7 +30,7 @@
 
 > A real-time dashboard that shows the latest temperature, pressure, and altitude, computes
 > simple statistics (max/min/avg/range), and plots the trend over selectable time ranges.
-> Live values come straight from Firebase; historical series come from the backend API.
+> All data (live and historical) comes directly from Firebase Realtime Database.
 
 ### Key objectives (what success looks like)
 
@@ -80,8 +80,7 @@
 
 | Service             | Purpose                          | Docs                          |
 |---------------------|----------------------------------|-------------------------------|
-| Backend API (Railway) | Historical readings (`GET /readings`) | (this project's backend)  |
-| Firebase RTDB       | Live readings + device metadata  | `https://firebase.google.com/docs/database` |
+| Firebase RTDB       | All readings + device metadata   | `https://firebase.google.com/docs/database` |
 
 > **Note:** No state library (Zustand) or React Query for now. The app is small enough that
 > React's built-in state + a couple of custom hooks are sufficient. Revisit if it grows.
@@ -96,29 +95,26 @@
 ┌─────────────────────────────────────────────────────────────┐
 │                    Dashboard (this layer)                    │
 │                  React SPA on Vercel (browser)               │
-└───────────────┬──────────────────────────┬──────────────────┘
-                │ REST (history)            │ Realtime listen
-        ┌───────▼─────────┐        ┌────────▼──────────┐
-        │ Backend API     │        │ Firebase RTDB     │
-        │ (Railway)       │        │ (client SDK)      │
-        │ GET /readings   │        │ live readings +   │
-        │                 │        │ devices/ metadata │
-        └─────────────────┘        └───────────────────┘
+└──────────────────────────┬──────────────────────────────────┘
+                           │ Realtime listen (client SDK)
+                   ┌───────▼──────────┐
+                   │ Firebase RTDB    │
+                   │ readings/ +      │
+                   │ devices/ metadata│
+                   └──────────────────┘
 ```
 
 ### Data-fetching strategy ("read all from Firebase, filter client-side")
 
 - **All readings** → subscribed directly from Firebase (client SDK) via `useReadings`, so new
   readings appear in real time without polling.
-- **Range filtering** → done in the frontend (`filterReadingsByRange`), not via the backend.
-  The full readings list is filtered by the selected range in the client.
+- **Range filtering** → done via Firebase query (`orderByChild` + `startAt` on `ts`) in `useReadings`,
+  so only the selected time window is fetched.
 - **Stats (max/min/avg/Δ)** → computed in the frontend (`computeStats`) from the filtered list.
 - **Device metadata** (name, location) → read once from Firebase `devices/<id>` (`useDeviceMeta`).
 
-> **Decision (Camino A):** for the current data volume, reading everything from Firebase and
-> filtering/computing in the client is simplest and gives real-time updates for free. The
-> backend `GET /readings` endpoint still exists and is available, but the dashboard does not
-> use it for now. Revisit (hybrid: backend for history + Firebase for live) if data grows large.
+> **Decision:** reading from Firebase and filtering/computing in the client is simplest and
+> gives real-time updates for free. No backend API is used.
 
 ### Patterns in use
 
@@ -138,7 +134,7 @@ weather-station-dashboard/
 │   │   ├── ui/              # Generic reusable bits (Card, RangeButton, ...)
 │   │   └── features/        # MetricCard, TrendChart, RangeFilter, DeviceMeta, RealTimer, DashboardSkeleton
 │   ├── hooks/               # useReadings, useDeviceMeta
-│   ├── lib/                 # api client, firebase client
+│   ├── lib/                 # firebase client
 │   ├── services/            # compute-stats, filter-readings, downsample-readings, format-chart-data (pure, tested)
 │   ├── types/               # reading.ts, metrics.ts, metricChart.ts, device.ts
 │   └── constants/           # ranges.ts (RANGES, DEFAULT_RANGE, RANGE_TO_MS, RANGE_LABEL), metrics.ts
@@ -161,11 +157,10 @@ weather-station-dashboard/
 
 ## 5. Domain Model / Key Types
 
-> **⚠️ For AI agents:** These types must stay in sync with the backend and the data layer.
-> A `Reading` here MUST match what `GET /readings` returns.
+> **⚠️ For AI agents:** These types must stay in sync with the data in Firebase.
 
 ```typescript
-// A single reading (matches the backend response)
+// A single reading (matches Firebase structure)
 type Reading = {
   ts: number;            // Unix timestamp in ms
   temp_c: number;        // temperature °C
@@ -177,7 +172,7 @@ type Reading = {
 // Derived from Reading — always in sync, never manually maintained
 type MetricKey = keyof Omit<Reading, 'ts'>;
 
-// Supported time ranges (must match the backend)
+// Supported time ranges
 type TimeRange = '1h' | '6h' | '24h' | '7d' | '30d';
 
 // Stats computed in the frontend for one metric over the selected range
@@ -238,19 +233,13 @@ type ChartPoint = Omit<Reading, 'ts'> & { time: string };
 ### What the dashboard consumes
 
 ```
-Backend (Railway):
-  GET /readings?range=1h|6h|24h|7d|30d
-    → 200 { "data": Reading[] }
-    → 400 { "error": { "code": "INVALID_RANGE", ... } }
-
 Firebase (client SDK):
-  readings/<deviceId>          → live readings (subscribe for real time)
+  readings/<deviceId>          → readings (real-time subscription with range query)
   devices/<deviceId>           → { name, location, elevation_m? }
 ```
 
 ### Conventions
 
-- Backend responses: `{ data }` on success, `{ error: { code, message } }` on failure.
 - Timestamps are Unix ms (`number`), consistent across all layers.
 - The dashboard reads only; it never writes.
 
@@ -303,9 +292,6 @@ export function MetricCard({ readings }: Props) {
 
 ```bash
 # .env.example — copy to .env and fill in. Vite exposes only VITE_* vars to the client.
-
-# Backend API base URL (Railway)
-VITE_API_BASE_URL=https://<your-app>.up.railway.app
 
 # Firebase web config (client SDK — safe to expose, but still kept in env)
 VITE_FIREBASE_API_KEY=
@@ -393,7 +379,8 @@ fix/xxx       → bugfixes
 | 2026-05-22  | Real-time via Firebase client SDK         | True push updates instead of polling the backend                 |
 | 2026-05-22  | No Zustand / React Query yet              | App is small; local state + hooks suffice. Revisit if it grows   |
 | 2026-05-22  | Device metadata in Firebase `devices/`    | Read by the dashboard; injected manually for now (endpoint later)|
-| 2026-05-23  | Read all from Firebase, filter client-side| Simplest for current volume; real-time for free. Backend `/readings` unused for now |
+| 2026-05-23  | Read all from Firebase, filter via query   | Simplest for current volume; real-time for free. No backend API needed              |
+| 2026-06-21  | Removed `api.ts` (backend client)          | Was dead code — dashboard reads exclusively from Firebase                           |
 | 2026-05-24  | `ComposedChart` (temp area + lines)       | Temperature as filled area; pressure/altitude as lines on separate axes |
 | 2026-05-24  | lucide-react for icons                    | Standard React icon set; no SVG files to manage; Tailwind-styleable |
 | 2026-06-02  | `MetricKey` derived as `keyof Omit<Reading, 'ts'>` | Prevents manual sync between `Reading` fields and `MetricKey` union |
@@ -408,7 +395,7 @@ fix/xxx       → bugfixes
 
 ## 14. Current Project Status
 
-**Last updated:** `2026-06-03`
+**Last updated:** `2026-06-21`
 
 ### What already exists and works
 
@@ -447,7 +434,6 @@ _Nothing actively in progress._
 
 ### Known technical debt
 
-- [ ] `api.ts` (backend client) exists but is unused (Camino A); keep or remove later
 - [ ] `TrendChart`: altitude `<YAxis>` needs `width={0}` (not just `hide`) or it reserves
       space and pushes the plot — documented inline; don't "clean it up"
 

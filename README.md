@@ -35,7 +35,7 @@ Real-time dashboard for an IoT weather station built with an **ESP32 + BME280** 
 - Node.js 20+
 - pnpm
 - A Firebase project with Realtime Database enabled
-- A running backend (Express on Railway) that receives ESP32 readings and writes them to Firebase under `readings/<DEVICE_ID>`
+- An ESP32 device writing readings to Firebase under `readings/<DEVICE_ID>`
 
 ### Installation
 
@@ -58,8 +58,6 @@ VITE_FIREBASE_APP_ID=
 # Device ID to display
 VITE_DEVICE_ID=
 
-# Backend API base URL (optional)
-VITE_API_BASE_URL=
 ```
 
 ### Running
@@ -89,7 +87,7 @@ Tests cover services (`compute-stats`, `filter-readings`, `format-chart-data`), 
 
 ## Data Shape
 
-The ESP32 sends readings to the backend via `POST /data`; the backend writes each one to Firebase under `readings/<DEVICE_ID>/<key>` in this structure:
+The ESP32 writes each reading to Firebase under `readings/<DEVICE_ID>/<key>` in this structure:
 
 ```json
 {
@@ -110,7 +108,7 @@ src/
 ├── components/features/   # UI components (MetricCard, TrendChart, RangeFilter, ...)
 ├── constants/             # Metrics config and time range definitions
 ├── hooks/                 # useReadings, useDeviceMeta
-├── lib/                   # Firebase initialization
+├── lib/                   # Firebase client initialization
 ├── services/              # Pure functions: stats, downsampling, chart formatting
 └── types/                 # TypeScript types (Reading, TimeRange, ...)
 ```
